@@ -1,0 +1,104 @@
+                   ┌─────────────────────────┐
+                   │       LockerSize (enum) │
+                   └─────────────────────────┘
+                   ┌─────────────────────────┐
+                   │       LockerState (enum)│
+                   └─────────────────────────┘
+
+┌─────────────┐        ┌──────────────┐        ┌─────────────────┐
+│   Item      │        │   Customer   │        │ DeliveryPerson  │
+├─────────────┤        ├──────────────┤        ├─────────────────┤
+│- itemId     │        │- customerId  │        │- deliveryPersonId│
+│- quantity   │        │- name        │        │                 │
+├─────────────┤        │- email       │        ├─────────────────┤
+│+ getters    │        │- phone       │        │+ deliverPackage()│
+└─────────────┘        ├──────────────┤        │+ pickupReturn()  │
+                        │+ placeOrder()│        │+ receiveNotif()  │
+                        │+ requestReturn()      │
+                        └──────────────┘        └─────────────────┘
+
+             ┌─────────────────┐ 1      * ┌──────────────┐
+             │     Order       │──────────│     Item      │
+             ├─────────────────┤          └──────────────┘
+             │- orderId        │
+             │- deliveryLoc    │
+             │- customerId     │
+             │- items          │
+             ├─────────────────┤
+             │+ addItem()      │
+             └─────────────────┘
+
+                ▲
+                │
+        ┌───────────────┐
+        │   Package     │
+        ├───────────────┤
+        │- packageId    │
+        │- packageSize  │
+        │- order        │
+        ├───────────────┤
+        │+ pack()       │
+        └─────▲─────────┘
+              │
+              │
+    ┌────────────────────┐
+    │   LockerPackage    │
+    ├────────────────────┤
+    │- codeValidDays     │
+    │- lockerId          │
+    │- code              │
+    │- deliveryTime      │
+    │- deliveryPersonId  │
+    ├────────────────────┤
+    │+ verifyCode()      │
+    │+ isValidCode()     │
+    └────────────────────┘
+
+┌───────────────┐  * ┌──────────────────┐  * ┌───────────────┐
+│ LockerLocation │───│     Locker        │───│ LockerPackage │
+├───────────────┤    ├──────────────────┤    └───────────────┘
+│- name         │    │- lockerId        │
+│- longitude    │    │- lockerSize      │
+│- latitude     │    │- locationId      │
+│- lockers      │    │- lockerState     │
+│- openTime     │    │- currentPackage  │
+│- closeTime    │    ├──────────────────┤
+├───────────────┤    │+ addPackage()    │
+│+ addLocker()  │    │+ removePackage() │
+└───────────────┘    └──────────────────┘
+
+                ┌───────────────────────┐
+                │     LockerService     │ (Singleton)
+                ├───────────────────────┤
+                │- locations            │
+                │- strategy: Assignment │
+                ├───────────────────────┤
+                │+ addLocation()        │
+                │+ findLockerById()     │
+                │+ requestLocker()      │
+                │+ requestReturn()      │
+                │+ verifyOTP()          │
+                └───────────────────────┘
+
+                     ┌───────────────────────────┐
+                     │ LockerAssignmentStrategy  │<<interface>>
+                     ├───────────────────────────┤
+                     │+ assignLocker(pkg, locs)  │
+                     └───────────▲──────────────┘
+                                 │
+             ┌───────────────────┴───────────────────┐
+             │                                       │
+┌─────────────────────────┐           ┌─────────────────────────┐
+│ FirstAvailableStrategy  │           │ SizeBasedStrategy       │
+└─────────────────────────┘           └─────────────────────────┘
+
+┌───────────────┐
+│ Notification   │
+├───────────────┤
+│- customerId   │
+│- orderId      │
+│- lockerId     │
+│- code         │
+├───────────────┤
+│+ send()       │
+└───────────────┘
