@@ -1,0 +1,310 @@
+Here’s the UML diagram for your Blackjack game design:
+
+```
++-------------------+
+|      Person       |
++-------------------+
+| - name: String    |
+| - streetAddress: String |
+| - city: String    |
+| - state: String   |
+| - country: String |
++-------------------+
+| + getName(): String |
++-------------------+
+
++-------------------+
+|       Card        |
++-------------------+
+| - suit: Suit      |
+| - faceValue: int  |
++-------------------+
+| + getValue(): int |
+| + getSuit(): Suit |
+| + getFaceValue(): int |
+| + toString(): String |
++-------------------+
+
++-------------------+
+|       Deck        |
++-------------------+
+| - cards: List<Card> |
++-------------------+
+| + getCards(): List<Card> |
++-------------------+
+
++-------------------+
+|       Shoe        |
++-------------------+
+| - cards: LinkedList<Card> |
++-------------------+
+| + shuffle(): void |
+| + dealCard(): Card |
++-------------------+
+
++-------------------+
+|       Hand        |
++-------------------+
+| - cards: List<Card> |
++-------------------+
+| + addCard(Card): void |
+| + getCards(): List<Card> |
+| + getScore(): int |
+| + toString(): String |
++-------------------+
+
++-------------------+
+|      Player       |<|--+ Abstract
++-------------------+
+| - id: String      |
+| - password: String |
+| - balance: double |
+| - status: AccountStatus |
+| - person: Person  |
+| - hand: Hand      |
++-------------------+
+| + setHand(Hand): void |
+| + getHand(): Hand |
+| + getBalance(): double |
+| + setBalance(double): void |
+| + resetPassword(): boolean {abstract} |
++-------------------+
+
++------------------------+
+|  BlackjackPlayer       |
++------------------------+
+| - bet: double          |
++------------------------+
+| + placeBet(double): void |
+| + getBet(): double     |
+| + payout(double): void |
+| + resetPassword(): boolean |
++------------------------+
+
++-------------------+
+|      Dealer       |
++-------------------+
+| (inherits Player) |
++-------------------+
+| + resetPassword(): boolean |
++-------------------+
+
++------------------------+
+| BlackjackController    |
++------------------------+
+|                        |
++------------------------+
+| + validateAction(String): boolean |
++------------------------+
+
++------------------------+
+|  BlackjackGameView     |
++------------------------+
+|                        |
++------------------------+
+| + showHands(Hand, Hand, boolean): void |
+| + showResult(String, double): void |
+| + announceBet(double, double): void |
+| + announcePlayerAction(String): void |
+| + announceForfeit(double): void |
++------------------------+
+
++------------------------+
+|    BlackjackGame       |
++------------------------+
+| - player: BlackjackPlayer |
+| - dealer: Dealer       |
+| - shoe: Shoe           |
+| - controller: BlackjackController |
+| - view: BlackjackGameView |
+| - hideDealerHole: boolean |
++------------------------+
+| + start(): void        |
+| + playAction(String): void |
+| - hit(): void          |
+| - stand(): void        |
+| - compareAndSettle(): void |
++------------------------+
+
+<<enumerations>>
++----------------+
+|      Suit      |
++----------------+
+| HEART          |
+| SPADE          |
+| CLUB           |
+| DIAMOND        |
++----------------+
+
++----------------+
+|  AccountStatus |
++----------------+
+| ACTIVE         |
+| CLOSED         |
+| CANCELED       |
+| BLACKLISTED    |
+| NONE           |
++----------------+
+```
+
+**Notes:**
+
+* `Player` is abstract; `BlackjackPlayer` and `Dealer` inherit from it.
+* `Hand` is associated with both player and dealer.
+* `Shoe` contains multiple decks; `Deck` contains 52 cards.
+* `BlackjackGame` manages the gameplay, uses `BlackjackController` for validation, and `BlackjackGameView` for displaying hands and results.
+
+
+
+
+Here’s a detailed explanation of the **role of each entity** in your Blackjack system UML:
+
+---
+
+### **1. `Person`**
+
+* Represents a real-world person’s information.
+* Holds **personal details**: name, address, city, state, country.
+* Used as a composition inside `Player` to store who the player is.
+
+---
+
+### **2. `Card`**
+
+* Represents a single playing card.
+* Contains:
+
+  * **Suit** (`HEART`, `SPADE`, `CLUB`, `DIAMOND`)
+  * **Face value** (1–13, where 1 = Ace, 11–13 = Jack, Queen, King)
+* Has methods to get its **Blackjack value** (face cards = 10, Ace = 11/1).
+* Overrides `toString()` for displaying card (e.g., `A-H` for Ace of Hearts).
+
+---
+
+### **3. `Deck`**
+
+* Represents a standard deck of 52 cards.
+* Contains a list of `Card` objects.
+* Used to populate a `Shoe`.
+
+---
+
+### **4. `Shoe`**
+
+* Represents **multiple decks combined**, as in casinos.
+* Contains a `LinkedList` of cards from one or more `Deck`s.
+* Responsible for:
+
+  * Shuffling all cards.
+  * Dealing cards one by one.
+
+---
+
+### **5. `Hand`**
+
+* Represents a **player’s or dealer’s hand**.
+* Contains a list of `Card`s.
+* Responsibilities:
+
+  * Add a new card (`addCard`).
+  * Compute **Blackjack score**, intelligently handling Aces as 1 or 11.
+  * Display hand with `toString()`.
+
+---
+
+### **6. `Player` (abstract)**
+
+* Base class for any game participant.
+* Attributes:
+
+  * ID, password, balance, account status.
+  * Composition: `Person` object and `Hand`.
+* Abstract method `resetPassword()` forces subclasses to implement password reset.
+
+---
+
+### **7. `BlackjackPlayer`**
+
+* Inherits `Player`.
+* Represents a **human player** in the game.
+* Responsibilities:
+
+  * Place a bet (`placeBet`) and manage balance.
+  * Track bet amount.
+  * Handle payouts (`payout`) based on game result.
+  * Reset password (dummy implementation here).
+
+---
+
+### **8. `Dealer`**
+
+* Inherits `Player`.
+* Represents the **casino dealer**.
+* Responsibilities:
+
+  * Follow Blackjack rules for hitting/standing.
+  * Manages their own hand but **does not bet**.
+  * `resetPassword()` not really used here.
+
+---
+
+### **9. `BlackjackController`**
+
+* Handles **game logic validation**.
+* Currently validates player actions like `hit` or `stand`.
+* Can be extended to enforce other game rules.
+
+---
+
+### **10. `BlackjackGameView`**
+
+* Handles **displaying information**.
+* Responsibilities:
+
+  * Show player’s and dealer’s hands.
+  * Show result messages and payouts.
+  * Announce bets, player actions, and forfeits.
+
+---
+
+### **11. `BlackjackGame`**
+
+* Core game engine.
+* Holds references to:
+
+  * `BlackjackPlayer` and `Dealer`.
+  * `Shoe` (cards).
+  * `BlackjackController` (rules).
+  * `BlackjackGameView` (display).
+* Responsibilities:
+
+  * Start game (deal initial hands).
+  * Handle player actions (`hit`/`stand`).
+  * Dealer logic (hit until 17).
+  * Compare hands and settle bets.
+
+---
+
+### **12. Enumerations**
+
+* **`Suit`** → 4 suits of cards.
+* **`AccountStatus`** → Player account state (active, closed, etc.)
+
+---
+
+✅ **Summary of Relationships**
+
+* `BlackjackGame` → orchestrates everything.
+* `Player` → holds `Hand`.
+* `Hand` → holds `Card`s.
+* `Shoe` → contains `Deck`s, which contain `Card`s.
+* `BlackjackPlayer` → places bets, interacts with game and view.
+* `Dealer` → follows rules, no betting.
+* `Controller` → validates actions.
+* `View` → shows game state.
+
+---
+
+If you want, I can **draw a diagram showing associations and multiplicities** along with the roles to make it visually clear which entity interacts with which.
+
+Do you want me to do that?
