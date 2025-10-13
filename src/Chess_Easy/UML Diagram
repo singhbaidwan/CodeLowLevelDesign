@@ -1,0 +1,117 @@
++-------------------------------------------+
+|                ChessGame                  |
++-------------------------------------------+
+| - gameId: String                          |
+| - players: Player[2]                      |
+| - board: Chessboard                       |
+| - currentTurn: Player                     |
+| - status: GameStatus                      |
+| - moveHistory: List<Move>                 |
+| - controller: ChessMoveController         |
+| - view: ChessGameView                     |
++-------------------------------------------+
+| + getGameId(): String                     |
+| + getPlayers(): Player[]                  |
+| + getBoard(): Chessboard                  |
+| + getCurrentTurn(): Player                |
+| + getStatus(): GameStatus                 |
+| + getMoveHistory(): List<Move>            |
+| + getController(): ChessMoveController    |
+| + getView(): ChessGameView                |
+| + setCurrentTurn(player: Player): void    |
+| + setStatus(status: GameStatus): void     |
++-------------------------------------------+
+                   |
+                   | 1
+                   |-----------------------------------+
+                   |                                   |
+                   v                                   v
+          +-------------------+              +------------------+
+          |    Chessboard     |              |  ChessGameView   |
+          +-------------------+              +------------------+
+          | - boxes: Box[8][8]|              |                  |
+          +-------------------+              +------------------+
+          | + resetBoard(): void             | + showBoard(board: Chessboard): void |
+          | + getBox(x:int, y:int): Box      |                                      |
+          +-------------------+              +------------------+
+                   |
+                   | 1
+                   |-------------------------------+
+                   |                               |
+                   v                               v
+             +-----------+                +-----------------------+
+             |    Box     |                | ChessMoveController  |
+             +-----------+                +-----------------------+
+             | - x: int   |                |                       |
+             | - y: int   |                +-----------------------+
+             | - piece: Piece              | + validateMove(piece: Piece, board: Chessboard, start: Box, end: Box): boolean |
+             +-----------+
+
+                         ^
+                         |
+                         | 0..1
+                         |
+                   +-------------+
+                   |   Piece     |<<abstract>>
+                   +-------------+
+                   | - white: boolean |
+                   | - killed: boolean|
+                   +-------------+
+                   | + isWhite(): boolean |
+                   | + setKilled(killed: boolean) |
+                   | + getSymbol(): String (abstract) |
+                   +-------------+
+        /|\         /|\         /|\        /|\        /|\
+         |           |           |          |          |
+         |           |           |          |          |
+   +---------+  +---------+  +---------+  +---------+  +---------+
+   |  King   |  |  Queen  |  |  Rook   |  | Bishop  |  | Knight  |
+   +---------+  +---------+  +---------+  +---------+  +---------+
+   | +getSymbol() | ...same structure... |
+   +---------+  +---------+  +---------+  +---------+  +---------+
+                                      |
+                                      v
+                                  +---------+
+                                  |  Pawn   |
+                                  +---------+
+                                  | +getSymbol() |
+                                  +---------+
+
++------------------+
+|      Move        |
++------------------+
+| - start: Box     |
+| - end: Box       |
+| - pieceMoved: Piece |
+| - pieceKilled: Piece |
+| - player: Player  |
+| - moveType: MoveType |
++------------------+
+| + toString(): String |
++------------------+
+
++------------------+
+|     Player       |
++------------------+
+| - name: String   |
+| - whiteSide: boolean |
++------------------+
+| + getName(): String |
+| + isWhiteSide(): boolean |
+| + toString(): String |
++------------------+
+
++----------------------+
+|       Enums          |
++----------------------+
+| GameStatus { ACTIVE, WHITE_WIN, BLACK_WIN, DRAW, STALEMATE, RESIGNATION, FORFEIT } |
+| MoveType { NORMAL, CASTLING, EN_PASSANT, PROMOTION } |
+| AccountStatus { ACTIVE, CLOSED, CANCELED, BLACKLISTED, NONE } |
++----------------------+
+
++-----------+
+|  Driver   |
++-----------+
+| + main()  |
+| + playMove(): void |
++-----------+
